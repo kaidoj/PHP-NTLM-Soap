@@ -97,6 +97,11 @@ class Client extends SoapClient
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
         curl_setopt($ch, CURLOPT_USERPWD, NTLM_USERNAME_PASSWORD);
+
+        if (defined('NTLM_INTERFACE')) {
+            curl_setopt($ch, CURLOPT_INTERFACE, NTLM_INTERFACE);
+        }
+
         $response = curl_exec($ch);
 
         $this->restoreStreamWrapper();
