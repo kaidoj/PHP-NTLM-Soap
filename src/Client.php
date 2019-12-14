@@ -31,6 +31,13 @@ class Client extends SoapClient
     protected $__last_request_headers;
 
     /**
+     * Url scheme
+     *
+     * @var string
+     */
+    protected $scheme = 'http';
+
+    /**
      * Client constructor.
      *
      * @param mixed $wsdl
@@ -44,6 +51,10 @@ class Client extends SoapClient
             define('NTLM_USERNAME_PASSWORD', "{$username}:{$password}");
         }
 
+        if (isset($options['use_https'])) {
+            $this->scheme = $options['use_https'] ? 'https' : 'http';
+        }
+
         $this->registerStreamWrapper();
 
         parent::__construct($wsdl, $options);
@@ -52,15 +63,15 @@ class Client extends SoapClient
     protected function restoreStreamWrapper()
     {
         // restore the original http protocole
-        stream_wrapper_restore('http');
+        stream_wrapper_restore($this->scheme);
     }
 
     protected function registerStreamWrapper()
     {
         // we unregister the current HTTP wrapper
-        stream_wrapper_unregister('http');
+        stream_wrapper_unregister($this->scheme);
         // we register the new HTTP wrapper
-        stream_wrapper_register('http', NtlmStream::class) or die("Failed to register protocol");
+        stream_wrapper_register($this->scheme, NtlmStream::class) or die("Failed to register protocol");
     }
 
     /**
@@ -97,11 +108,6 @@ class Client extends SoapClient
         curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
         curl_setopt($ch, CURLOPT_USERPWD, NTLM_USERNAME_PASSWORD);
-
-        if (defined('NTLM_INTERFACE')) {
-            curl_setopt($ch, CURLOPT_INTERFACE, NTLM_INTERFACE);
-        }
-
         $response = curl_exec($ch);
 
         $this->restoreStreamWrapper();

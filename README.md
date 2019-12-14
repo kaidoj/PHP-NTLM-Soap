@@ -12,10 +12,16 @@ class PetsService
 {
     public function getPetTypes()
     {
+        // to use https
+        $options = [
+            'use_https' => true
+        ];
+
         $client = new Client(
             'http://my.pets.com/WS_Pet_types', // Endpoint of the call
             'PetService\Username', // NTLM username
-            'pa55w0rd' // NTLM password
+            'pa55w0rd' // NTLM password,
+            $options
         );
         
         $response = $client->ReadMultiple(['filter' => null]); // Call the ReadMultiple Soap call with filter parameter
